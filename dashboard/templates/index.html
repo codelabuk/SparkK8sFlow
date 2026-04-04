@@ -959,7 +959,14 @@ async function deleteApp(name) {
 // ── deploy ─────────────────────────────────────────────────────────────────
 function toggleMainClass() {
   const t = document.getElementById('f-type').value;
-  document.getElementById('mainClassGroup').style.display = (t === 'Python' || t === 'R') ? 'none' : 'block';
+  const group = document.getElementById('mainClassGroup');
+  const input = document.getElementById('f-mc');
+  if (t === 'Python' || t === 'R') {
+    group.style.display = 'none';
+    input.value = '';
+  } else {
+    group.style.display = 'block';
+  }
 }
 
 function applyPreset(key) {
