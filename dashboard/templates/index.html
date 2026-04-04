@@ -494,7 +494,7 @@
     <!-- topbar -->
     <div class="topbar">
       <div class="topbar-left">
-        <input id="apiUrl" class="api-input" value="http://localhost:5000" placeholder="Flask API URL"/>
+        <input id="apiUrl" class="api-input" value="" placeholder="API auto-detected"/>
         <select id="nsSelect" class="ns-select" onchange="refresh()">
           <option value="spark">spark</option>
         </select>
@@ -692,19 +692,23 @@
 
       <!-- ── SPARK HISTORY page ── -->
       <div id="page-history" class="page">
-        <div class="page-header">
-          <div>
-            <div class="page-title">Spark history server</div>
-            <div class="page-sub">Running at NodePort 32080 · <a href="#" onclick="window.open(AppConfig.historyServerUrl,'_blank')" style="color:var(--blue)">open in new tab ↗</a></div>
-          </div>
-        </div>
-        <div class="panel">
-          <div class="panel-header"><span class="panel-title">Embedded view</span></div>
-          <div class="panel-body" style="padding:0">
-            <iframe src="historyFrame" class="history-frame" title="Spark History Server"></iframe>
-          </div>
-        </div>
+  <div class="page-header">
+    <div>
+      <div class="page-title">Spark history server</div>
+      <div class="page-sub">
+        <a id="historyExternalLink" href="#" target="_blank"
+           style="color:var(--blue)">open in new tab ↗</a>
       </div>
+    </div>
+  </div>
+  <div class="panel">
+    <div class="panel-header"><span class="panel-title">Embedded view</span></div>
+    <div class="panel-body" style="padding:0">
+      <iframe id="historyFrame" src="" class="history-frame"
+              title="Spark History Server"></iframe>
+    </div>
+  </div>
+</div>
 
     </div><!-- /content -->
   </div><!-- /main -->

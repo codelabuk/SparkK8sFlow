@@ -1,4 +1,4 @@
-from config import SPARK_NAMESPACE, SPARK_HISTORY_URL, DASHBOARD_NAMESPACES
+from config import SPARK_NAMESPACE, SPARK_HISTORY_URL, DASHBOARD_NAMESPACES, SPARK_HISTORY_EXTERNAL_URL
 import requests as req_lib
 from flask import Response
 from flask import Flask, jsonify, request, render_template
@@ -169,6 +169,7 @@ def get_config():
     return jsonify({
         "defaultNamespace": SPARK_NAMESPACE,
         "historyServerUrl": SPARK_HISTORY_URL,
+        "historyExternalUrl": SPARK_HISTORY_EXTERNAL_URL,
         "namespaces": DASHBOARD_NAMESPACES
     })
 

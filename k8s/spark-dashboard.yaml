@@ -66,6 +66,8 @@ spec:
               value: "spark"
             - name: SPARK_HISTORY_URL
               value: "http://spark-history-server.spark.svc.cluster.local:18080"
+            - name: SPARK_HISTORY_EXTERNAL_URL
+              value: "http://spark-history.codelabuk"
             - name: DASHBOARD_NAMESPACES
               value: "spark"
           resources:
@@ -117,7 +119,7 @@ metadata:
 spec:
   ingressClassName: nginx
   rules:
-    - host: spark.codelabuk
+    - host: spark-dashboard.codelabuk
       http:
         paths:
           - path: /

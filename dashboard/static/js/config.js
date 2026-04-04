@@ -1,7 +1,8 @@
 const AppConfig = {
-  apiBase: () => document.getElementById('apiUrl').value.replace(/\/$/, ''),
-  defaultNamespace: 'spark',
-  historyServerUrl: 'http://localhost:32080',
+  apiBase: () => window.location.origin,
+
+  defaultNamespace:   null,
+  historyExternalUrl: null,
 
   async load() {
     try {
@@ -11,9 +12,9 @@ const AppConfig = {
       );
       const cfg = await res.json();
       this.defaultNamespace   = cfg.defaultNamespace;
-      this.historyServerUrl   = cfg.historyServerUrl;
+      this.historyExternalUrl = cfg.historyExternalUrl;
 
-      // update namespace dropdown from config
+      // populate namespace dropdown
       const sel = document.getElementById('nsSelect');
       sel.innerHTML = '';
       cfg.namespaces.forEach(n => {
@@ -23,14 +24,15 @@ const AppConfig = {
         sel.appendChild(o);
       });
 
-      // set history iframe — use proxy route so X-Frame-Options is bypassed
       const frame = document.getElementById('historyFrame');
       if (frame) frame.src = '/proxy/history/';
 
+      const extLink = document.getElementById('historyExternalLink');
+      if (extLink) extLink.href = cfg.historyExternalUrl;
+
     } catch (_) {
-      // offline — keep defaults, iframe stays as localhost fallback
       const frame = document.getElementById('historyFrame');
-      if (frame) frame.src = 'http://localhost:32080';
+      if (frame) frame.src = 'about:blank';
     }
   }
 };

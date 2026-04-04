@@ -34,7 +34,7 @@ spec:
           image: apache/spark:3.5.3
           command: ["/bin/sh", "-c"]
           args:
-            -  |
+            - |
                 mkdir -p /tmp/spark-events &&
                 /opt/spark/sbin/start-history-server.sh &&
                 tail -f /dev/null
@@ -43,8 +43,6 @@ spec:
               value: >-
                 -Dspark.history.fs.logDirectory=/tmp/spark-events
                 -Dspark.history.ui.port=18080
-#            - name: SPARK_NO_DAEMONIZE
-#              value: "true"
           ports:
             - containerPort: 18080
               name: http
@@ -58,18 +56,18 @@ spec:
             limits:
               memory: "1Gi"
               cpu: "500m"
-#          readinessProbe:
-#            httpGet:
-#              path: /
-#              port: 18080
-#            initialDelaySeconds: 10
-#            periodSeconds: 10
-#          livenessProbe:
-#            httpGet:
-#              path: /
-#              port: 18080
-#            initialDelaySeconds: 30
-#            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 18080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 18080
+            initialDelaySeconds: 30
+            periodSeconds: 20
       volumes:
         - name: spark-events
           persistentVolumeClaim:
@@ -92,3 +90,27 @@ spec:
       name: http
   selector:
     app: spark-history-server
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: spark-history-server
+  namespace: spark
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: spark-history.codelabuk
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: spark-history-server
+                port:
+                  number: 18080
