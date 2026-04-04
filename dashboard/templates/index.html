@@ -729,18 +729,7 @@
 
 <script>
 // ── demo data ──────────────────────────────────────────────────────────────
-const DEMO_PODS = [
-  {name:"spark-history-server-7d9b4c-xkp2q", status:"Running",  labels:{"app":"spark-history-server"}, node:"docker-desktop", created:"2026-04-03T14:22:10Z"},
-  {name:"spark-pi-driver",                    status:"Completed", labels:{"spark-role":"driver"},        node:"docker-desktop", created:"2026-04-04T08:15:33Z"},
-  {name:"spark-pi-da1968a-exec-1",            status:"Completed", labels:{"spark-role":"executor"},      node:"docker-desktop", created:"2026-04-04T08:15:40Z"},
-  {name:"word-count-driver",                  status:"Running",   labels:{"spark-role":"driver"},        node:"docker-desktop", created:"2026-04-04T09:10:05Z"},
-  {name:"python-etl-driver",                  status:"Failed",    labels:{"spark-role":"driver"},        node:"docker-desktop", created:"2026-04-03T22:00:00Z"}
-];
-const DEMO_APPS = [
-  {name:"spark-pi",    state:"COMPLETED", type:"Scala",  image:"apache/spark:3.5.1",         created:"2026-04-04T08:15:00Z"},
-  {name:"word-count",  state:"RUNNING",   type:"Scala",  image:"apache/spark:3.5.1",         created:"2026-04-04T09:10:00Z"},
-  {name:"python-etl",  state:"FAILED",    type:"Python", image:"apache/spark:3.5.1-python3", created:"2026-04-03T22:00:00Z"}
-];
+
 const DEMO_NAMESPACES = ["spark","default","airflow","kube-system"];
 const DEMO_LOGS = `26/04/04 09:10:05 INFO SparkContext: Running Spark version 3.5.1
 26/04/04 09:10:05 INFO ResourceUtils: ==============================================================
@@ -831,9 +820,9 @@ async function refresh() {
   } catch (_) {
     liveMode = false;
     setConn('error', 'Offline');
-    renderPods(DEMO_PODS);
-    renderApps(DEMO_APPS);
-    updateMetrics(DEMO_PODS, DEMO_APPS);
+<!--    renderPods(DEMO_PODS);-->
+<!--    renderApps(DEMO_APPS);-->
+<!--    updateMetrics(DEMO_PODS, DEMO_APPS);-->
   }
   document.getElementById('lastRefresh').textContent =
     'Refreshed ' + new Date().toLocaleTimeString();
@@ -1095,9 +1084,7 @@ function toast(msg, type) {
 }
 
 // ── init ───────────────────────────────────────────────────────────────────
-renderPods(DEMO_PODS);
-renderApps(DEMO_APPS);
-updateMetrics(DEMO_PODS, DEMO_APPS);
+refresh();
 </script>
 </body>
 </html>

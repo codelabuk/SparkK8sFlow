@@ -73,7 +73,7 @@ def delete_pod(name):
     core_v1.delete_namespaced_pod(name=name, namespace=ns)
     return jsonify({"deleted": name})
 
-@app.route('/api/namespace')
+@app.route('/api/namespaces')
 def list_namespace():
     ns_list = core_v1.list_namespace()
     return jsonify([ns.metadata.name for ns in ns_list.items])
@@ -82,14 +82,14 @@ def list_namespace():
 def list_spark_apps():
     ns = request.args.get("namespace", NAMESPACE)
     try:
-        resp = custom_api.list_cluster_custom_object(
+        resp = custom_api.list_namespaced_custom_object(
             group=SPARK_GROUP,
             version=SPARK_VERSION,
             namespace=ns,
             plural=SPARK_PLURAL
         )
         result = []
-        for item in resp.items("items", []):
+        for item in resp.get("items", []):
             state = item.get("status", {}).get("applicationState",{})
             result.append({
                 "name": item["metadata"]["name"],
@@ -120,7 +120,7 @@ def submit_spark_app():
             "type": body.get("type", "Scala"),
             "mode": "cluster",
             "image": body.get("image", "apache/spark:3.5.1"),
-            "imagePullPolicy": "IfNotPresent",
+            "imagePullPolicy": body.get("imagePullPolicy", "Never"),
             "mainApplicationFile": body["jarPath"],
             "sparkVersion": body.get("sparkVersion","3.5.1"),
             "restartPolicy": {"type": "Never"},
@@ -130,8 +130,8 @@ def submit_spark_app():
                 "serviceAccount": "spark"
             },
             "executor": {
-                "cores": int(body["executorCores",1]),
-                "instances": int(body["executorInstances",1]),
+                "cores": int(body.get("executorCores",1)),
+                "instances": int(body.get("executorInstances",1)),
                 "memory": body.get("executorMemory","512m")
             }
         }
@@ -139,6 +139,14 @@ def submit_spark_app():
 
     if body.get("mainClass"):
         spark_app["spec"]["mainClass"] = body["mainClass"]
+
+    custom_api.create_namespaced_custom_object(
+        group=SPARK_GROUP,
+        version=SPARK_VERSION,
+        namespace=ns,
+        plural=SPARK_PLURAL,
+        body=spark_app
+    )
 
     return jsonify({"submitted": body["name"]}), 201
 
