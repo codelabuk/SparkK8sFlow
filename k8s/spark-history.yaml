@@ -31,16 +31,20 @@ spec:
     spec:
       containers:
         - name: spark-history-server
-          image: apache/spark:3.5.3-python3
-          command:
-            - /opt/spark/sbin/spark-history-server.sh
+          image: apache/spark:3.5.3
+          command: ["/bin/sh", "-c"]
+          args:
+            -  |
+                mkdir -p /tmp/spark-events &&
+                /opt/spark/sbin/start-history-server.sh &&
+                tail -f /dev/null
           env:
             - name: SPARK_HISTORY_OPTS
               value: >-
                 -Dspark.history.fs.logDirectory=/tmp/spark-events
                 -Dspark.history.ui.port=18080
-            - name: SPARK_NO_DAEMONIZE
-              value: "true"
+#            - name: SPARK_NO_DAEMONIZE
+#              value: "true"
           ports:
             - containerPort: 18080
               name: http
@@ -54,18 +58,18 @@ spec:
             limits:
               memory: "1Gi"
               cpu: "500m"
-          readinessProbe:
-            httpGet:
-              path: /
-              port: 18080
-            initialDelaySeconds: 10
-            periodSeconds: 10
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 18080
-            initialDelaySeconds: 30
-            periodSeconds: 20
+#          readinessProbe:
+#            httpGet:
+#              path: /
+#              port: 18080
+#            initialDelaySeconds: 10
+#            periodSeconds: 10
+#          livenessProbe:
+#            httpGet:
+#              path: /
+#              port: 18080
+#            initialDelaySeconds: 30
+#            periodSeconds: 20
       volumes:
         - name: spark-events
           persistentVolumeClaim:
