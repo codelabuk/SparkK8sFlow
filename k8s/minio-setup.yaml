@@ -110,7 +110,6 @@ spec:
             claimName: minio-pvc
 
 ---
-# S3 API service — used by Spark s3a:// and the mc CLI
 apiVersion: v1
 kind: Service
 metadata:
@@ -126,14 +125,24 @@ spec:
     - name: api
       port: 9000
       targetPort: 9000
-      nodePort: 32090    # http://localhost:32090 — S3 API endpoint
+      nodePort: 32090
     - name: console
       port: 9001
       targetPort: 9001
-      nodePort: 32091    # http://localhost:32091 — MinIO web console
+      nodePort: 32091
 
 ---
-# MinIO Web Console — minio.codelabuk.dev
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: minio-console-headers
+  namespace: minio
+data:
+  Upgrade: "$http_upgrade"
+  Connection: "upgrade"
+
+---
+# MinIO Web Console
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -145,10 +154,13 @@ metadata:
     nginx.ingress.kubernetes.io/proxy-send-timeout: "600"
     nginx.ingress.kubernetes.io/proxy-buffering: "off"
     nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
-    # WebSocket support for MinIO console (no snippet needed)
     nginx.ingress.kubernetes.io/proxy-set-headers: "minio/minio-console-headers"
 spec:
   ingressClassName: nginx
+  tls:
+    - hosts:
+        - minio.codelabuk.dev
+      secretName: minio-tls
   rules:
     - host: minio.codelabuk.dev
       http:
@@ -162,17 +174,7 @@ spec:
                   number: 9001
 
 ---
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: minio-console-headers
-  namespace: minio
-data:
-  Upgrade: "$http_upgrade"
-  Connection: "upgrade"
-
----
-# MinIO S3 API — minio-api.codelabuk.dev
+# MinIO S3 API — https://minio-api.codelabuk.dev
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
