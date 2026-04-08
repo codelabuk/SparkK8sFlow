@@ -60,7 +60,7 @@ def main():
     print("SPARK SIMPLE COUNTER JOB COMPLETE")
     print(f"\n[INFO] Job completed in {elapsed_time:.2f} seconds:")
 
-    spark.stop()
+  #  spark.stop()
 
 
 if __name__ == "__main__":
