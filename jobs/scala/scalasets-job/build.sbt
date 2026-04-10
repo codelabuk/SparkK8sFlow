@@ -1,5 +1,5 @@
 name := "Word Count"
-
+organization := "org.codelabuk"
 version := "0.1"
 
 scalaVersion := "2.12.18"

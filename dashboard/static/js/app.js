@@ -181,7 +181,7 @@ function renderPodTable(tbodyId, pods, emptyMsg) {
 
     let sparkUIButton = '';
     if (isDriver) {
-      const uiUrl = `/proxy/spark-ui/${p.name}?namespace=${ns}`;
+      const uiUrl = `https://${p.name}.driver.codelabuk.dev`;
       sparkUIButton = `<a href="${uiUrl}" target="_blank" class="btn btn-sm" style="margin-left:4px" title="Open Spark UI">UI</a>`;
     }
 
