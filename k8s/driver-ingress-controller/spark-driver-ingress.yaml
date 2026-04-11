@@ -1,0 +1,103 @@
+---
+# ServiceAccount for the controller
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: driver-ingress-controller
+  namespace: spark
+
+---
+# ClusterRole with permissions to manage Ingresses
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: driver-ingress-controller
+rules:
+  - apiGroups: [""]
+    resources: ["pods", "services"]
+    verbs: ["get", "list", "watch", "create", "delete"]
+  - apiGroups: ["networking.k8s.io"]
+    resources: ["ingresses"]
+    verbs: ["get", "list", "watch", "create", "delete"]
+
+---
+# Bind the role to the ServiceAccount
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: driver-ingress-controller
+subjects:
+  - kind: ServiceAccount
+    name: driver-ingress-controller
+    namespace: spark
+roleRef:
+  kind: ClusterRole
+  name: driver-ingress-controller
+  apiGroup: rbac.authorization.k8s.io
+
+---
+# ConfigMap with the Python script
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: driver-ingress-controller
+  namespace: spark
+data:
+  controller.py: |
+    #!/usr/bin/env python3
+    """Auto-create Ingress for each Spark driver pod"""
+    
+    
+
+---
+# CronJob that runs every 30 seconds
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: driver-ingress-controller
+  namespace: spark
+spec:
+  schedule: "*/1 * * * *"  # Every minute
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: driver-ingress-controller
+          restartPolicy: Never
+          containers:
+            - name: controller
+              image: python:3.11-slim
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  pip install --quiet kubernetes && \
+                  python /scripts/controller.py
+              env:
+                - name: SPARK_NAMESPACE
+                  value: "spark"
+              volumeMounts:
+                - name: scripts
+                  mountPath: /scripts
+          volumes:
+            - name: scripts
+              configMap:
+                name: driver-ingress-controller
+                defaultMode: 0755
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: spark-drivers
+  namespace: spark
+spec:
+  clusterIP: None
+  selector:
+    spark-role: driver
+  ports:
+    - port: 4040
+      targetPort: 4040
+      name: ui

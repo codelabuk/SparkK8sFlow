@@ -56,11 +56,12 @@ def main():
     elapsed_time = time.time() - start_time
 
 
-    print("=" * 60)
     print("SPARK SIMPLE COUNTER JOB COMPLETE")
     print(f"\n[INFO] Job completed in {elapsed_time:.2f} seconds:")
-
-  #  spark.stop()
+    #
+    # query = df.writeStream.format("console").outputMode("complete").start()
+    #
+    # query.awaitTermination()
 
 
 if __name__ == "__main__":
