@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: metastore
+  labels:
+    app.kubernetes.io/name: metastore
+    app.kubernetes.io/component: storage
+    app.kubernetes.io/part-of: labuk-platform
