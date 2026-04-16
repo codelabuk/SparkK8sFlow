@@ -1,0 +1,54 @@
+
+## TODO test the iceberge through HIVE thrift server
+apiVersion: sparkoperator.k8s.io/v1beta2
+kind: SparkApplication
+metadata:
+  name: iceberg-test
+  namespace: spark
+spec:
+  type: Scala
+  mode: cluster
+  image: apache/spark:3.5.3
+  imagePullPolicy: IfNotPresent
+  sparkVersion: "3.5.3"
+  mainClass: org.apache.spark.sql.hive.thriftserver.HiveThriftServer2
+  mainApplicationFile: "local:///opt/spark/jars/spark-hive-thriftserver_2.12-3.5.3.jar"
+
+  # Iceberg dependencies
+  deps:
+    jars:
+      - https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-spark-runtime-3.5_2.12/1.5.0/iceberg-spark-runtime-3.5_2.12-1.5.0.jar
+      - https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws/3.3.4/hadoop-aws-3.3.4.jar
+      - https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk-bundle/1.12.262/aws-java-sdk-bundle-1.12.262.jar
+
+  sparkConf:
+    # Iceberg catalog
+    spark.sql.catalog.iceberg: org.apache.iceberg.spark.SparkCatalog
+    spark.sql.catalog.iceberg.type: hive
+    spark.sql.catalog.iceberg.uri: thrift://hive-metastore.metastore.svc.cluster.local:9083
+    spark.sql.catalog.iceberg.warehouse: s3a://warehouse/
+    spark.sql.catalog.iceberg.io-impl: org.apache.iceberg.aws.s3.S3FileIO
+    spark.sql.defaultCatalog: iceberg
+    spark.sql.extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
+
+    # S3/MinIO
+    spark.hadoop.fs.s3a.endpoint: http://minio.minio.svc.cluster.local:9000
+    spark.hadoop.fs.s3a.access.key: sparkadmin
+    spark.hadoop.fs.s3a.secret.key: sparkadmin123
+    spark.hadoop.fs.s3a.path.style.access: "true"
+    spark.hadoop.fs.s3a.impl: org.apache.hadoop.fs.s3a.S3AFileSystem
+    spark.hadoop.fs.s3a.connection.ssl.enabled: "false"
+
+  driver:
+    cores: 1
+    memory: "1g"
+    labels:
+      version: 3.5.3
+    serviceAccount: spark-operator
+
+  executor:
+    cores: 1
+    instances: 1
+    memory: "1g"
+    labels:
+      version: 3.5.3
